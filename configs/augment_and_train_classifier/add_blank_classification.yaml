@@ -1,0 +1,26 @@
+# 生成全白(Blank)類別資料：輸出到 base_dir/symbol/bg/
+base_dir: "/content/drive/MyDrive/Map_segment/train_data_add_White_background/一個類別280張_(比例版本)/10萬_2張有標記_68x110_Legend_processed_Frameless"
+
+symbol: "blank"          # 類別資料夾名稱
+num_images: 280          # 生成張數
+
+target_hw: [68, 110]     # (H, W)
+
+# 這兩個保留你原本的參數語意
+opacities: [25]          # 目前僅用來做迴圈；預設不影響輸出路徑
+bg_ids: [0]              # 底圖子資料夾編號（輸出到 symbol/{bg}/）
+
+# 影像格式
+rgba_value: [255, 255, 255, 255]   # 全白 RGBA
+filename_digits: 2                  # blank_00.png 這個 00 的位數
+
+# 進階選項
+overwrite: true          # 已存在就覆蓋
+make_json: false         # 若你流程需要 json 再打開
+json_template:
+  category: "blank"
+  note: "dummy"
+
+# ⚠️重要：為了不改你現有資料結構，預設不把 opacity 放進輸出資料夾
+# 如果你未來真的要 opacities=[25,50,75] 且各自分開存，才把這個打開
+use_opacity_subdir: false

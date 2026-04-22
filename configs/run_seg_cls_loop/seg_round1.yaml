@@ -1,0 +1,36 @@
+basic:
+  train_model_method: "3_18_EVA_02_22m"
+  Map_number: "17"
+  ROUND: 1
+
+paths:
+  img_path: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/data/cropped_map/augmentation_JMGeo_1930s_data/-{Map_number}.tif"
+  sam_ckpt: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/model/sam_1/sam_vit_h_4b8939.pth"
+  model_typ: "vit_h"
+  round_root: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/run_seg_cls_loop_result/sam1/tile_split_method/{train_model_method}/{Map_number}/round_{ROUND}"
+  csv_filename: "sam_masks_info.csv"
+  full_concat_filename: "sam_full_concat.png"
+
+device:
+  device: "auto"   # auto / cuda / cpu
+
+tile:
+  tile_size: 2048
+  pad_value: 0
+
+sam:
+  sam_points_per_batch: 128
+  sam_crop_n_layers: 1
+  sam_crop_n_points_downscale_factor: 1
+  sam_pred_iou_thresh: 0.85
+  sam_stability_score_thresh: 0.85
+
+output:
+  save_full_concat: true
+  save_demo_jpg: true
+  demo_jpg_quality: 75
+  overlay_alpha: 0.5
+  append_background_mask: true
+
+color:
+  random_seed: null   # null = 維持原本隨機；填整數可重現

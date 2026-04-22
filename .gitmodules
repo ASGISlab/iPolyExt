@@ -1,0 +1,3 @@
+[submodule "submodules/uiuc-validation"]
+	path = submodules/validation
+	url = https://github.com/DARPA-CRITICALMAAS/uiuc-validation.git

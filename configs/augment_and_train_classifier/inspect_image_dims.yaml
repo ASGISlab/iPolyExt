@@ -1,0 +1,4 @@
+root_dir: /content/drive/MyDrive/Map_segment/4張有標記_68x112_Legend_processed_Frameless
+img_exts: [".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".gif"]
+print_files: true
+max_print: 50

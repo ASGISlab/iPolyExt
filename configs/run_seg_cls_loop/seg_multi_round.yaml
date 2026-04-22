@@ -1,0 +1,35 @@
+task:
+  train_model_method: "3_18_EVA_02_22m"
+  map_number: "17"
+  round: 2
+
+paths:
+  err_root_template: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/過去的SAM_分類循環jupyter_cell/classify/tile_split_method/SAM_post_classify_out/{train_model_method}/{map_number}/round_{prev_round}/segmentation_rejected"
+  out_root_template: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/過去的SAM_分類循環jupyter_cell/sam1/tile_split_method/{train_model_method}/{map_number}/round_{round}"
+  sam_ckpt: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/model/sam_1/sam_vit_h_4b8939.pth"
+
+model:
+  device: "auto"   # auto / cuda / cpu
+  model_type: "vit_h"
+
+sam_generator:
+  points_per_side: 32
+  points_per_batch: 64
+  pred_iou_thresh: 0.75
+  stability_score_thresh: 0.75
+  crop_n_layers: 1
+  crop_n_points_downscale_factor: 1
+  output_mode: "binary_mask"
+
+runtime:
+  bbox_pad: 12
+  overlay_alpha: 0.5
+  residual_alpha: 0.5
+  jpeg_quality: 75
+  save_fallback_original_mid: true
+  save_tile_residual: true
+
+regex:
+  fname_pattern: "_ty([-]?\\d+)_tx([-]?\\d+)_"
+  mid_stem_pattern: "mid_(.+?)(?:_\\d{3})?$"
+  sanitize_pattern: "[^A-Za-z0-9_\\-]+"

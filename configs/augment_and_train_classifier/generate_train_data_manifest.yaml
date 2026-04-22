@@ -1,0 +1,11 @@
+root_dir: "/content/drive/MyDrive/Map_segment/fixed_train_data/一個類別250張/5萬_2張有標記_68x110/fixed_train_data_20250923_061359"
+
+meta_path: "meta.json"
+out_path: "train_data.json"
+
+pure_color:
+  enabled: true
+  positives: []   # 這裡填入「必須完全等於 meta.json classes 內的 class 名」
+
+backup:
+  enabled: true

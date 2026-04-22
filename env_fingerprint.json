@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-03-30T14:13:02",
+  "python": "3.10.12 (main, Mar  3 2026, 11:56:32) [GCC 11.4.0]",
+  "platform": "Linux-5.15.0-168-generic-x86_64-with-glibc2.35",
+  "pip_md5": "3606c0f898ae7f7f873566a743099839",
+  "paths": {
+    "requirements_locked": "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/requirements-locked.txt",
+    "pip_freeze_sorted": "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/pip-freeze-sorted.txt"
+  },
+  "torch": {
+    "version": "2.5.1+cu121",
+    "cuda": "12.1",
+    "cudnn": 90100,
+    "gpu": "NVIDIA A100 80GB PCIe"
+  },
+  "nvidia_smi": "Mon Mar 30 14:13:03 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 590.48.01              Driver Version: 590.48.01      CUDA Version: 13.1     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA A100 80GB PCIe          Off |   00000000:27:00.0 Off |                    0 |\n| N/A   76C    P0            210W /  300W |   50535MiB /  81920MiB |     96%      Default |\n|                                         |                        |             Disabled |\n+-----------------------------------------+------------------------+----------------------+\n"
+}

@@ -1,0 +1,43 @@
+vars:
+  train_model_method: "YOUR_TRAIN_MODEL_METHOD"
+  map_number: "17"
+  round: 1
+
+paths:
+  # 1) 錯誤整合圖輸入 / 輸出
+  error_src_dir: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/過去的SAM_分類循環jupyter_cell/分類test_result/SAM切割法/SAM_post_classify_out/{train_model_method}/只有-{map_number}/round_{round}/SAM分割錯誤"
+  error_out_dir: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/過去的SAM_分類循環jupyter_cell/分類test_result/SAM切割法/SAM_post_classify_out/{train_model_method}/只有-{map_number}/round_{round}/當前正確與錯誤整合/錯誤部分"
+
+  # 2) 正確整合圖輸入 / 輸出
+  correct_masks_dir: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/過去的SAM_分類循環jupyter_cell/分類test_result/SAM切割法/SAM_post_classify_out/{train_model_method}/只有-{map_number}/round_{round}/SAM分割正確/merged"
+  alt_image: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/data/map/原圖_JMGeo_1930s_data/-{map_number}"
+  correct_out_dir: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/過去的SAM_分類循環jupyter_cell/分類test_result/SAM切割法/SAM_post_classify_out/{train_model_method}/只有-{map_number}/round_{round}/當前正確與錯誤整合/正確部分"
+
+  # 3) union 檢查輸出
+  union_out_dir: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/過去的SAM_分類循環jupyter_cell/分類test_result/SAM切割法/SAM_post_classify_out/{train_model_method}/只有-{map_number}/round_{round}/當前正確與錯誤整合/錯誤與正確整合"
+
+options:
+  valid_exts: [".png", ".jpg", ".jpeg", ".tif", ".tiff"]
+  image_resolve_exts: [".png", ".tif", ".tiff"]
+  white_value: 255
+  white_th_pixel: 255
+  alpha: 0.5
+  random_seed: 123
+  error_scan_recursive: false
+
+  # 這裡是我幫你補的關鍵修正：
+  # - original_image_nonwhite：用原圖非白區當 target，真正檢查整輪是否丟像素（預設）
+  # - correct_image_nonwhite：完全貼近你原本最後一個 cell 的作法
+  # - error_image_nonwhite：以錯誤圖非白區當 target
+  # - union_nonwhite：用 union 自己當 target（通常不適合做缺失檢查）
+  target_mask_mode: "original_image_nonwhite"
+
+names:
+  error_output_name: "segmentation_rejected_reconstructed_full.png"
+  correct_group_name: "merged"
+  correct_only_name: "merged_correct_only_full.png"
+  correct_mask_name: "merged_correct_mask.png"
+  union_output_name: "union_correct_plus_error.png"
+  union_missing_mask_name: "union_missing_mask.png"
+  union_missing_overlay_name: "union_with_missing_overlay.png"
+  union_stats_json_name: "union_stats.json"

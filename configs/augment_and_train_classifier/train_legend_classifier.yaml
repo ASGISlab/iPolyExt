@@ -1,0 +1,55 @@
+paths:
+  base_dir: /data/ch21908234/datasets/tran_data
+  train_dir: /data/ch21908234/datasets/tran_data/train
+  val_dir: /data/ch21908234/datasets/tran_data/val
+  output_dir: /data/ch21908234/exp/legend_cls_eva02
+data:
+  img_ext: .png
+  target_size:
+  - 56
+  - 98
+  batch_size: 32
+  num_workers: 4
+  pin_memory: true
+  prefetch_factor: 2
+  persistent_workers: true
+  normalize_mean:
+  - 0.485
+  - 0.456
+  - 0.406
+  normalize_std:
+  - 0.229
+  - 0.224
+  - 0.225
+sampler:
+  enable: true
+  mode: class_then_domain_balanced
+model:
+  name: eva02_small_patch14_336.mim_in22k_ft_in1k
+  pretrained: true
+  img_size_override: true
+train:
+  seed: 1234
+  deterministic: true
+  benchmark: false
+  epochs: 50
+  save_every: 1
+  warmup_epochs: 5
+  amp: true
+  tf32: true
+  criterion: ce
+  optimizer:
+    name: adamw
+    lr: 5e-4
+    betas:
+    - 0.9
+    - 0.999
+    eps: 1e-8
+    weight_decay: 0.05
+    no_decay_on:
+    - bias
+    - norm
+  scheduler:
+    name: warmup_cosine
+eval:
+  f1_average: macro

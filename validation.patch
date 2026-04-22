@@ -1,0 +1,43 @@
+diff --git a/src/grading.py b/src/grading.py
+index 0279eaa..55e4704 100644
+--- a/src/grading.py
++++ b/src/grading.py
+@@ -13,18 +13,23 @@ MISS_COLOR = (255,1,255) # Fuchsia
+ 
+ log = logging.getLogger('DARPA_CMAAS_VALIDATION')
+ 
+-def grade_poly_raster(pred_image, true_image, feedback_image=None):
++def grade_poly_raster(pred_image, true_image, feedback_image=None, map_name=None):
+     # Do we need to convert to binary mask? Currently i don't think so
+     intersection = pred_image & true_image
+     union = pred_image | true_image
+ 
+     true_positive = np.count_nonzero(intersection)
+     # avoid div by 0
++    result = {}
++    result['Map'] = map_name
++    result['Map Area'] = np.prod(true_image.shape)
++    result['Matched Points'] = np.count_nonzero(intersection) # Green
++    result['Missing Points'] = np.count_nonzero(true_image) - result['Matched Points'] # Pink
++    result['Unmatched Points'] = np.count_nonzero(pred_image) - result['Matched Points'] # Red
+     if true_positive == 0:
+-        result = {'F1 Score' : 0, 'Precision' : 0, 'Recall' : 0, 'IoU Score' : 0}
++        result = result | {'F1 Score' : 0, 'Precision' : 0, 'Recall' : 0, 'IoU Score' : 0}
+         return result, feedback_image
+ 
+-    result = {}
+     recall = true_positive / np.count_nonzero(true_image)
+     precision = true_positive / np.count_nonzero(pred_image)
+     
+@@ -240,11 +245,6 @@ def usgs_grade_poly_raster(pred_image, true_image, image, feature_bounding_box,
+     result['F1 Score'] = (2 * precision * recall)/(precision+recall)
+     result['IoU Score'] = true_positive / np.count_nonzero(union)
+ 
+-    if feedback_image is not None:
+-        feedback_image[(true_image>=1).all(-1)] = MISS_COLOR
+-        feedback_image[(image>=1).all(-1)] = FAIL_COLOR
+-        feedback_image[(intersection==1).all(-1)] = CORRECT_COLOR
+-
+     return result, feedback_image
+ 
+ def match_by_color(map_image, feature_bounding_box, color_range=4):

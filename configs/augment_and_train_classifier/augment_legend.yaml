@@ -1,0 +1,29 @@
+seed: 1234
+big_root: "/data/Map_segment/文榮給的大地圖背景/地理圖已處理"
+small_root: "/data/Map_segment/10萬_2張有標記_68x110_Legend_processed_Frameless"
+out_root: "/data/Map_segment/train_data/一個類別280張_(比例版本)/10萬_2張有標記_68x110_Legend_processed_Frameless"
+
+# Opacity 權重（3:1:1:1:1）
+opacity_weights:
+  "1.0": 3
+  "0.75": 1
+  "0.5": 1
+  "0.25": 1
+  "0.0": 1
+
+unit_per_weight: 40     # 40 * (3+1+1+1+1)=280
+total_per_class: null   # 二選一：若你想用總數分配就填數字
+
+# 大底圖 2:1:1
+bg_weights:
+  contour_sample.png: 2
+  Contour_1924_5K.png: 1
+  Contour_1924_5K-2.png: 1
+
+bg_code:
+  contour_sample.png: "CS"
+  Contour_1924_5K.png: "C5K"
+  Contour_1924_5K-2.png: "C5K2"
+
+max_retry_per_sample: 50
+white_thr: 250

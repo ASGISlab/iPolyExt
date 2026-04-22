@@ -1,0 +1,39 @@
+experiment:
+  map_number: "17"
+  round: 2
+  train_model_method: "3_18_EVA_02_22m"
+  method: "gen_legend_ratio_augmentation"
+  data_name: "fixed_train_data_20260316_172943"
+  map_name: "17"
+
+paths:
+  project_root: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop"
+  legacy_cell_root: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop/過去的SAM_分類循環jupyter_cell"
+
+model:
+  model_name: "eva02_small_patch14_336.mim_in22k_ft_in1k"
+  batch_size: 64
+  conf_th: 0.30
+
+  patch_h: 56
+  patch_w: 98
+  stride_h: 56
+  stride_w: 98
+
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+
+vote:
+  majority_th: 0.90
+  min_patch: 10
+  min_nonblank: 2
+  strong_min: 1
+
+rules:
+  blank_name: "blank"
+  enable_debug_print: true
+  blank_white_area_ratio: 0.5
+  small_threshold_extra_cols: 60
+
+  # 2. 若你之後想改成自動推導，就把上面兩行拿掉，改用這個
+  # small_threshold_extra_cols: 60

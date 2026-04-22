@@ -1,0 +1,21 @@
+# configs/split_train_val.yaml
+
+src: /content/drive/MyDrive/Map_segment/train_data_add_White_background/一個類別280張_(比例版本)/10萬_2張有標記_68x110_Legend_processed_Frameless
+
+out_base: /content/drive/MyDrive/Map_segment/fixed_train_data/一個類別280張_(比例版本)/10萬_2張有標記_68x110
+out_prefix: fixed_train_data_
+# 會變成 fixed_train_data_YYYYMMDD_HHMMSS
+default_map_name: "XIV"
+
+val_ratio: 0.2
+img_exts: [".png"]
+
+# special top folder names（來源可能是 BGC / blank / bg_color）
+special_tops: ["BGC", "blank", "bg_color"]
+bg_color_alias_to: "BGC"              # bg_color -> BGC（維持你「不改名」的習慣）
+
+# 是否真的 copy 檔案；先用 false 做 dry-run 看分配數量/輸出 meta
+do_copy: true
+
+# 進度條
+use_tqdm: true

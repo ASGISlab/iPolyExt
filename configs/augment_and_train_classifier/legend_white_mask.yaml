@@ -1,0 +1,51 @@
+# I/O
+src_root: "/content/drive/MyDrive/Map_segment/train_data/一個類別280張_(比例版本)/10萬_2張有標記_68x110_Legend_processed_Frameless"
+out_root: "/content/drive/MyDrive/Map_segment/train_data_add_White_background/一個類別280張_(比例版本)/10萬_2張有標記_68x110_Legend_processed_Frameless"
+
+# behavior
+overwrite_out_root: true
+copy_json: false
+img_exts: [".png"]
+
+# reproducibility
+seed: 1234
+
+# per-class mode allocation (1:1:1)
+noise_mode_weights:
+  line: 1
+  rect: 1
+  none: 1
+
+# single target distribution
+noise_area_target_single:
+  target: 0.21
+  min: 0.07
+  max: 0.36
+
+cand_tries_num: 6   # 候選數，越大越貼近 target，但越慢（你也說會影響分布方差）
+
+# file tag
+noise_tag:
+  none: "N"
+  line: "L"
+  rect: "R"
+
+# mask generator hyperparams (可選：先照你原本值)
+line_mask:
+  min_strokes: 1
+  max_strokes: 3
+  max_brush_width: 14
+  max_len_mode: "max_hw"   # max(h,w)
+  max_tries: 10
+
+rect_mask:
+  max_polys: 4
+  max_tries: 10
+
+# area control
+union_until:
+  max_add_line: 6
+  max_add_rect: 4
+  max_add_cap: 30
+erode_until:
+  max_iter: 30

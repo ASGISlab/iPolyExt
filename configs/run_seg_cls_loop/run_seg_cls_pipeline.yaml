@@ -1,0 +1,42 @@
+meta:
+  python: "python"
+  work_dir: "/data/ch21908234/work/SAM_Classifier_Feedback_Loop"
+  temp_config_dir: "${work_dir}/configs/run_seg_cls_loop/_generated/${experiment_name}"
+
+common:
+  map_number: "17"
+  train_model_method: "gen_legend_ratio"
+  total_rounds: 4
+
+  experiment_name: "map${map_number}_${total_rounds}round"
+
+  original_map_path: "${work_dir}/data/map/原圖_JMGeo_1930s_data/-${map_number}.tif"
+  sam_checkpoint: "${work_dir}/過去的SAM_分類循環jupyter_cell/sam_vit_h_4b8939.pth"
+  pipeline_output_root: "${work_dir}/output/${experiment_name}"
+
+modules:
+  seg_round1:
+    script: "src/run_seg_cls_loop/seg_round1.py"
+    config_template: "configs/run_seg_cls_loop/seg_round1.yaml"
+    task:
+      map_number: "17"
+      round: 1
+      data_name: "fixed_train_data_20260316_172943"
+      method: "gen_legend_ratio_augmentation"
+      train_model_method: "3_18_EVA_02_22m"
+
+  seg_multi_round:
+    script: "src/run_seg_cls_loop/seg_multi_round.py"
+    config_template: "configs/run_seg_cls_loop/seg_multi_round.yaml"
+
+  classify_round1:
+    script: "src/run_seg_cls_loop/classify_round1.py"
+    config_template: "configs/run_seg_cls_loop/classify_round1.yaml"
+
+  classify_multi_round:
+    script: "src/run_seg_cls_loop/classify_multi_round.py"
+    config_template: "configs/run_seg_cls_loop/classify_multi_round.yaml"
+
+  check_seg_cls_round_integrity:
+    script: "src/run_seg_cls_loop/check_seg_cls_round_integrity.py"
+    config_template: "configs/run_seg_cls_loop/check_seg_cls_round_integrity.yaml"
