@@ -1,4 +1,7 @@
-# Quickstart
+# What is this repository for?
+iPolyExt is a software for extracting polygon features from geological maps.
+
+# How to setup the environment?
 
 ```bash
 git clone repo
@@ -12,16 +15,11 @@ git submodule update --init --recursive
 git apply --directory=submodules/validation validation.patch
 ```
 
-To reproduce the GeoNet experiments, you must install TensorFlow, as it is the required framework for the GeoNet classifier scripts:
-```bash
-pip install tensorflow
-```
-
-## Processing Your Custom Map
+## Usage
 
 ### Step 1: Data Preparation & Preprocessing
-First, ensure your map file (`your_map.[tif/png/...]`) is placed in `/path/to/data/map/`. 
-You will also need two precomputed JSON files:
+First, download `example.tar` from the releases tab and extract the contents into `/path/to/data`.
+You will see two precomputed JSON files:
 1. **Map Layout Data:** Located at `/path/to/data/map/your_map.json` in the [Uncharted JSON format](https://github.com/DARPA-CRITICALMAAS/uiuc-pipeline#uncharted-json-format). *(If this is missing, you will need to manually annotate the map layout).*
 2. **Legend Data:** Located at `/path/to/data/legend/` in the [USGS JSON format](https://github.com/DARPA-CRITICALMAAS/uiuc-pipeline#usgs-json-format).
 
@@ -36,10 +34,11 @@ python ./scripts/data_preproc.py \
     --map_dir=/path/to/data/map \
     --map_out_dir=/path/to/data/cropped_map \
     --legend_dir=/path/to/data/legend \
-    --preproc_mode=global_consistent
+    --preproc_mode=paper_tint
 ```
 
 ### Step 2: Create Negative Training Data (Optional)
+**You do not need to perform this step for the example map!**
 If your map contains regions that are not represented in the legend (e.g., oceans, lakes, or blank borders), you should manually create bounding boxes for these areas to prevent false positives during extraction. This script will generate training data for the `others` class and save it to `/path/to/data/cls_data`.
 
 ```bash
@@ -57,7 +56,7 @@ Run the following scripts sequentially to generate, blend, augment, and split th
 python ./scripts/create_blank_training_data.py --map=your_map --cls_dir=/path/to/data/cls_data
 
 # 2. Blend contours into the map patches
-python ./scripts/blend_contour_map.py --map=your_map --legend_patch_dir=/path/to/data/legend/global_consistent --cls_dir=/path/to/data/cls_data
+python ./scripts/blend_contour_map.py --map=your_map --legend_patch_dir=/path/to/data/legend/paper_tint --cls_dir=/path/to/data/cls_data
 
 # 3. Augment data shapes
 python ./scripts/augment_data_shape.py --map=your_map --cls_dir=/path/to/data/cls_data
@@ -78,11 +77,13 @@ python ./scripts/train_cls.py \
 ```
 
 ### Step 5: Polygon Extraction
-Finally, use the trained classifier (`apple_pie`) alongside the SAM (Segment Anything Model) to extract the map polygons based on the legend. The output masks will be saved to `/path/to/data/output_dir/apple_pie/gen_legend_ratio_augmentation/output/round_[1~4]`.
+Finally, use the trained classifier (`apple_pie`) alongside the SAM (Segment Anything Model) to extract the polygon features. 
+To use SAM model, you need to copy `sam_1` directroy from `TJCP_models.tar` into `/path/to/model`.
+The output masks will be saved to `/path/to/data/output_dir/apple_pie/gen_legend_ratio_augmentation/output/round_[1~4]`.
 
 **Hardware Requirements:**
 *   This step requires GPUs. Set the `--gpu_ids` argument based on your machine (e.g., `--gpu_ids=0` for a single GPU, or `--gpu_ids=0,1` for two GPUs).
-*   If you encounter **GPU Out-Of-Memory (OOM)** errors, lower the `--sam_procs` (default: 4) and `--cls_procs` (default: 4) arguments.
+*   If you encounter **Out-Of-Memory (OOM)** errors, lower the `--sam_procs` (default: 4) and `--cls_procs` (default: 4) arguments.
 *   *Note: The default settings were tested on a machine with 4x V100 GPUs and 504GB of RAM.*
 
 ```bash
@@ -92,100 +93,20 @@ python ./scripts/polygon_extraction.py \
     --cls_ckpt=apple_pie \
     --out_dir=/path/to/data/output_dir \
     --run_name=apple_pie \
-    --model_dir=/path/to/model \
-    --gpu_ids=0,1
+    --model_dir=/path/to/model
 ```
 
 
 ## Reproducing Experiments on TJCP
 
-This section covers the workflow for processing scanned maps, generating training/validation data, and reproducing the experimental results (including the GeoNet baseline).
+This section covers the workflow for reproducing the experimental results of our proposed polygon extraction method.
 
-### Step 1: Data Extraction & Preprocessing
+### Step 1: Data Extraction
 First, extract `data.tar` into the `data` directory located at the root of this repo.
 Then, extract `TJCP_models.tar` into the `model` directory located at the root of this repo.
 
-
-Next, run the preprocessing script. The `--legend_dir` should point to the directory containing precomputed legend data in the USGS JSON format.
-
-**1. With Image Transformation:** Apply image transformations. Cropped maps will be saved to `data/cropped_map_transformed` and legends to `data/Legend/transformed`.
-```bash
-python ./scripts/data_preproc.py \
-    --map_dir=data/map \
-    --map_out_dir=data/cropped_map_transformed \
-    --legend_dir=data/Legend \
-    --preproc_mode=global_consistent
-```
-
-**2. Without Image Transformation:** Run the same process without transformations. Cropped maps will be saved to `data/cropped_map` and legends to `data/Legend/original`.
-```bash
-python ./scripts/data_preproc.py \
-    --map_dir=data/map \
-    --map_out_dir=data/cropped_map \
-    --legend_dir=data/Legend
-```
-
-### Step 2: Generate Validation Data (Ground Truth)
-Convert the annotation data (GeoJSON) into TIF format to create polygon validation data. This will be used later for evaluating the classifier and polygon extraction. 
-
-```bash
-# Generate ground truth TIFFs for all maps based on the transformed cropped maps
-python ./scripts/geojson2tiff.py --map=XIII --map_dir=data/cropped_map_transformed
-python ./scripts/geojson2tiff.py --map=XIV --map_dir=data/cropped_map_transformed
-python ./scripts/geojson2tiff.py --map=13 --map_dir=data/cropped_map_transformed
-python ./scripts/geojson2tiff.py --map=17 --map_dir=data/cropped_map_transformed
-python ./scripts/geojson2tiff.py --map=35 --map_dir=data/cropped_map_transformed
-
-# Generate "Others" category validation data (Only applies to maps XIII and XIV)
-python ./scripts/others_tif.py --map=XIII --map_dir=data/cropped_map_transformed
-python ./scripts/others_tif.py --map=XIV --map_dir=data/cropped_map_transformed
-```
-
-### Step 3: Generate Training Data (Proposed Method)
-Run the following commands sequentially to generate the training dataset, blend contours, apply augmentations, and split the data into training and validation sets. 
-
-*Note: The split data will be saved under `data/train_data/stage_3/gen_legend_ratio_augmentation/<map_name>`, and `my_exp` is used here as the run name.*
-
-```bash
-# 1. Generate "Others" category training data (Only for XIII and XIV)
-python ./scripts/create_others_training_data.py --map=XIII --map_dir=data/cropped_map_transformed
-python ./scripts/create_others_training_data.py --map=XIV --map_dir=data/cropped_map_transformed
-
-# 2. Generate "Blank" category training data
-for map_id in 13 17 35 XIII XIV; do
-    python ./scripts/create_blank_training_data.py --map=$map_id
-done
-
-# 3. Blend contours using manually restored legend patches
-for map_id in 13 17 35 XIII XIV; do
-    python ./scripts/blend_contour_map.py --map=$map_id --legend_patch_dir=data/Legend/transformed_restored
-done
-
-# 4. Augment training data (Randomly removes pixels within the polygon area of patches)
-for map_id in 13 17 35 XIII XIV; do
-    python ./scripts/augment_data_shape.py --map=$map_id
-done
-
-# 5. Split into training and validation sets
-for map_id in 13 17 35 XIII XIV; do
-    python ./scripts/split_training_val_data.py --map=$map_id --run_name=my_exp --cls_dir=data/train_data
-done
-```
-*(Note: Bash `for` loops are used above to keep the documentation clean. You can also run them line-by-line as in your original script).*
-
-### Step 4: Train Classifiers
-Train an individual classifier for each map based on the generated data.
-```bash
-python ./scripts/train_cls.py --map=13
-python ./scripts/train_cls.py --map=17
-python ./scripts/train_cls.py --map=35
-python ./scripts/train_cls.py --map=XIII
-python ./scripts/train_cls.py --map=XIV
-```
-
-### Step 5: Evaluate Classifiers
+### Step 2: Evaluate Classifiers
 Evaluate the classifiers. The commands below use the provided pre-trained checkpoints (e.g., `fixed_train_data_20260316_173955`). 
-**⚠️ Important:** If you want to evaluate the models you just trained yourself, replace the `--cls_ckpt` and `--cls_data` arguments with your specific `run_name` (e.g., `my_exp`).
 
 ```bash
 # Evaluate Legend classes
@@ -204,47 +125,9 @@ python ./scripts/cls_eval_report.py --cls_method=gen_legend_ratio_augmentation -
 python ./scripts/cls_eval_report.py --cls_method=gen_legend_ratio_augmentation --cls_eval_target=legends
 ```
 
-***
+### Step 3: Polygon Extraction
+Use the trained classifiers to reproduce the polygon extraction experiments. The resulting TIFF masks will be saved to `run_seg_cls_loop_result/my_exp/gen_legend_ratio_augmentation/output/round_[1~4]`.
 
-### Step 6: GeoNet Baseline (Optional)
-To reproduce the GeoNet baseline experiments, follow this pipeline to generate data, train, and evaluate using the `GeoNet_Orig_augmentation` method.
-
-```bash
-# 1. Generate Training Data
-python ./scripts/create_others_training_data.py --map=XIII --cls_method=GeoNet_Orig_augmentation --map_dir=data/cropped_map_transformed
-python ./scripts/create_others_training_data.py --map=XIV --cls_method=GeoNet_Orig_augmentation --map_dir=data/cropped_map_transformed
-
-for map_id in 13 17 35 XIII XIV; do
-    python ./scripts/create_blank_training_data.py --map=$map_id --cls_method=GeoNet_Orig_augmentation
-    python ./scripts/split_training_val_data.py --map=$map_id --cls_method=GeoNet_Orig_augmentation --run_name=my_exp
-done
-
-# 2. Train GeoNet Classifiers
-for map_id in 13 17 35 XIII XIV; do
-    python ./scripts/geonet_train_cls.py --map=$map_id
-done
-
-# 3. Evaluate GeoNet Classifiers (Replace ckpt/data variables if using your own models)
-python ./scripts/eval_cls.py --map=13 --cls_ckpt=fixed_train_data_20260317_142546 --cls_data=fixed_train_data_20260317_142546 --cls_eval_target=legends --cls_method=GeoNet_Orig_augmentation --cls_key_dir=data/cls_answer_key
-python ./scripts/eval_cls.py --map=17 --cls_ckpt=fixed_train_data_20260317_144221 --cls_data=fixed_train_data_20260317_144221 --cls_eval_target=legends --cls_method=GeoNet_Orig_augmentation --cls_key_dir=data/cls_answer_key
-python ./scripts/eval_cls.py --map=35 --cls_ckpt=fixed_train_data_20260317_150220 --cls_data=fixed_train_data_20260317_150220 --cls_eval_target=legends --cls_method=GeoNet_Orig_augmentation --cls_key_dir=data/cls_answer_key
-python ./scripts/eval_cls.py --map=XIII --cls_ckpt=fixed_train_data_20260317_135735 --cls_data=fixed_train_data_20260317_135735 --cls_eval_target=legends --cls_method=GeoNet_Orig_augmentation --cls_key_dir=data/cls_answer_key
-python ./scripts/eval_cls.py --map=XIV --cls_ckpt=fixed_train_data_20260317_141239 --cls_data=fixed_train_data_20260317_141239 --cls_eval_target=legends --cls_method=GeoNet_Orig_augmentation --cls_key_dir=data/cls_answer_key
-
-python ./scripts/eval_cls.py --map=XIII --cls_ckpt=fixed_train_data_20260317_135735 --cls_data=fixed_train_data_20260317_135735 --cls_eval_target=others --cls_method=GeoNet_Orig_augmentation --cls_key_dir=data/cls_answer_key
-python ./scripts/eval_cls.py --map=XIV --cls_ckpt=fixed_train_data_20260317_141239 --cls_data=fixed_train_data_20260317_141239 --cls_eval_target=others --cls_method=GeoNet_Orig_augmentation --cls_key_dir=data/cls_answer_key
-
-# 4. Generate Reports
-python ./scripts/cls_eval_report.py --cls_method=GeoNet_Orig_augmentation --cls_eval_target=others
-python ./scripts/cls_eval_report.py --cls_method=GeoNet_Orig_augmentation --cls_eval_target=legends
-```
-
-***
-
-### Step 7: Polygon Extraction (Reproducing Paper Results)
-Use the trained classifiers to reproduce the legend polygon extraction experiments from the paper. The resulting TIFF masks will be saved to `run_seg_cls_loop_result/my_exp/gen_legend_ratio_augmentation/output/round_[1~4]`.
-
-*(Remember to update `--cls_ckpt` to your run name if you are not using the pre-trained checkpoints).*
 
 ```bash
 python ./scripts/polygon_extraction.py --cls_method=gen_legend_ratio_augmentation --map=XIII --map_dir=data/cropped_map_transformed --cls_ckpt=fixed_train_data_20260316_171401 --out_dir=run_seg_cls_loop_result --run_name=my_exp
@@ -254,7 +137,7 @@ python ./scripts/polygon_extraction.py --cls_method=gen_legend_ratio_augmentatio
 python ./scripts/polygon_extraction.py --cls_method=gen_legend_ratio_augmentation --map=35 --map_dir=data/cropped_map_transformed --cls_ckpt=fixed_train_data_20260316_172120 --out_dir=run_seg_cls_loop_result --run_name=my_exp
 ```
 
-### Step 8: Evaluate Polygon Extraction
+### Step 4: Evaluate Polygon Extraction
 Finally, evaluate the accuracy of the extracted polygons.
 ```bash
 python ./scripts/eval_poly.py \
@@ -265,10 +148,11 @@ python ./scripts/eval_poly.py \
     --output run_seg_cls_loop_result/my_exp/gen_legend_ratio_augmentation/output/round_4/feedback/ \
     --feedback
 ```
+The metrics report and feedback images will be located in `run_seg_cls_loop_result/my_exp/gen_legend_ratio_augmentation/output/round_4/feedback/`.
 
 
 ## Reproducing Experiments on AI4CMA
-This section covers the workflow for reproducing the experimental results using the trained models.
+This section outlines the workflow for reproducing the experimental results using our proposed polygon extraction method.
 
 ### Step 1: Data Extraction & Preprocessing
 First, extract `data.tar` into the `data` directory located at the root of this repo.
@@ -276,7 +160,7 @@ Then, extract `AI4CMA_models.tar` into the `model_wo_restoration` directory loca
 You also need to copy `sam_1` directroy from `TJCP_models.tar` into `model_wo_restoration`.
 
 ### Step 2: Polygon Extraction (Reproducing Paper Results)
-Use the trained classifiers to reproduce the legend polygon extraction experiments from the paper. The resulting TIFF masks will be saved to `ai4cma_result_wo_restoration/no_restoration/gen_legend_ratio_augmentation/output/round_[1~4]`.
+Use the trained classifiers to reproduce the polygon extraction experiments. The resulting TIFF masks will be saved to `ai4cma_result_wo_restoration/no_restoration/gen_legend_ratio_augmentation/output/round_[1~4]`.
 
 ```bash
 MAP_LIST=(
